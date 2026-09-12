@@ -1,6 +1,6 @@
 {
   "name": "lognorth",
-  "description": "Read your production logs from inside your coding agent. Bundles the LogNorth MCP server with the debugging, integration, and deploy skills.",
+  "description": "Read your production logs from inside your coding agent. Bundles the LogNorth MCP server with the debugging and SDK integration skills.",
   "version": "0.16.0",
   "author": {
     "name": "Carlos Castellanos",

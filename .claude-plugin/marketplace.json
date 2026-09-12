@@ -12,10 +12,16 @@
     {
       "name": "lognorth",
       "source": "./",
-      "description": "Read your production logs from inside your coding agent. MCP server plus the debugging, integration, and deploy skills.",
+      "description": "Read your production logs from inside your coding agent. MCP server plus the debugging and SDK integration skills.",
       "version": "0.16.0",
       "category": "observability",
-      "keywords": ["logs", "observability", "error-tracking", "debugging", "self-hosted"]
+      "keywords": [
+        "logs",
+        "observability",
+        "error-tracking",
+        "debugging",
+        "self-hosted"
+      ]
     }
   ]
 }

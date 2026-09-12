@@ -2,7 +2,7 @@
 
 Your agent should not have to ask you what production is doing. This plugin connects it straight to your [LogNorth](https://lognorth.com) server: it reads the failing requests, follows the trace, and tells you what broke, in the same pane as the code.
 
-It bundles two things. The **MCP server** gives your agent four read-only tools over your logs. The **skills** teach it what the data means, how to triage an issue, and how to set LogNorth up in the first place.
+It bundles two things. The **MCP server** gives your agent four read-only tools over your logs. The **skills** teach it what the data means and how to triage an issue.
 
 Everything stays on your box. Your agent asks your instance, and only the answer reaches your AI provider.
 
@@ -21,7 +21,6 @@ Needs LogNorth **v0.16.0 or later** for MCP. Run `lognorth update` if you are be
 |-------|--------------|
 | `lognorth` | Debug production: triage issues, follow traces, read context |
 | `lognorth-integrate` | Add the LogNorth SDK to a Go, Node, or Rails project |
-| `lognorth-deploy` | Stand up a LogNorth server |
 
 There is no tool that writes, mutes, or deletes. The agent can look, never touch.
 
@@ -46,7 +45,7 @@ export LOGNORTH_AGENT_KEY="lgn-agent-..."
 /plugin install lognorth@lognorth
 ```
 
-That is the whole thing: MCP server and all three skills, wired to the two environment variables above. Check it with `/mcp`.
+That is the whole thing: MCP server and both skills, wired to the two environment variables above. Check it with `/mcp`.
 
 ### Claude Code — MCP only
 
