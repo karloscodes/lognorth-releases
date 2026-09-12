@@ -39,7 +39,7 @@ There is no tool that writes, mutes, or deletes. The agent can look, never touch
 
 ```
 /plugin marketplace add karloscodes/lognorth-releases
-/plugin install lognorth@lognorth
+/plugin install lognorth
 /lognorth:connect
 ```
 
@@ -159,14 +159,6 @@ Zed, in `settings.json`:
 ```
 
 The same `npx -y mcp-remote <url> --header "Authorization: Bearer <key>"` command works for any client that accepts a stdio command.
-
-### Skills without MCP
-
-For an agent that reads skills but has no MCP support, install the skills alone. They call the REST API with `curl`:
-
-```bash
-npx skills add karloscodes/lognorth-releases --skill lognorth
-```
 
 ## Then ask
 
