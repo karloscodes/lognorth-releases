@@ -1,0 +1,21 @@
+{
+  "name": "lognorth",
+  "description": "Read your production logs from inside your coding agent. Bundles the LogNorth MCP server with the debugging, integration, and deploy skills.",
+  "version": "0.16.0",
+  "author": {
+    "name": "Carlos Castellanos",
+    "url": "https://lognorth.com"
+  },
+  "homepage": "https://lognorth.com/docs/integrations/mcp/",
+  "repository": "https://github.com/karloscodes/lognorth-releases",
+  "license": "MIT",
+  "keywords": [
+    "logs",
+    "logging",
+    "observability",
+    "error-tracking",
+    "debugging",
+    "self-hosted",
+    "mcp"
+  ]
+}

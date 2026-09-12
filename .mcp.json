@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "lognorth": {
+      "type": "http",
+      "url": "${LOGNORTH_URL}/mcp",
+      "headers": {
+        "Authorization": "Bearer ${LOGNORTH_AGENT_KEY}"
+      }
+    }
+  }
+}
