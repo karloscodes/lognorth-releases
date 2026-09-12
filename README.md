@@ -22,6 +22,10 @@ Needs LogNorth **v0.16.0 or later** for MCP. Run `lognorth update` if you are be
 | `lognorth` | Debug production: triage issues, follow traces, read context |
 | `lognorth-integrate` | Add the LogNorth SDK to a Go, Node, or Rails project |
 
+| Command | What it does |
+|---------|--------------|
+| `/lognorth:connect` | Point this machine at your server: asks, verifies, saves |
+
 There is no tool that writes, mutes, or deletes. The agent can look, never touch.
 
 ## First, two values
@@ -29,23 +33,26 @@ There is no tool that writes, mutes, or deletes. The agent can look, never touch
 1. **Your URL**, for example `https://logs.yoursite.com`.
 2. **An agent key** from **Settings > Developer** in LogNorth. It is read-only and starts with `lgn-agent-`. It is not the app key your SDKs use to send events.
 
-Export them and every install below works as written:
+## Install
+
+### Claude Code
+
+```
+/plugin marketplace add karloscodes/lognorth-releases
+/plugin install lognorth@lognorth
+/lognorth:connect
+```
+
+`/lognorth:connect` asks for the URL and the key, checks them against your server before saving anything, and stores them in `~/.claude/settings.json` so every project and every session picks them up. Restart, then `/mcp` shows the server.
+
+Pass them inline if you prefer: `/lognorth:connect https://logs.yoursite.com lgn-agent-...`
+
+It saves to `settings.json` rather than telling you to export shell variables, because a GUI-launched client does not inherit your shell. If you would rather manage it yourself, export the two variables and skip the command:
 
 ```bash
 export LOGNORTH_URL="https://logs.yoursite.com"
 export LOGNORTH_AGENT_KEY="lgn-agent-..."
 ```
-
-## Install
-
-### Claude Code — the plugin
-
-```
-/plugin marketplace add karloscodes/lognorth-releases
-/plugin install lognorth@lognorth
-```
-
-That is the whole thing: MCP server and both skills, wired to the two environment variables above. Check it with `/mcp`.
 
 ### Claude Code — MCP only
 
@@ -182,6 +189,7 @@ box is up. The timeout is Stripe-side.
 - **404 on `/mcp`** — the server predates v0.16.0. Run `lognorth update`.
 - **401** — wrong key, or an app key instead of an agent key. Agent keys start with `lgn-agent-` and come from Settings > Developer.
 - **Nothing in the tool list** — most clients only read MCP config at startup. Restart it.
+- **Claude Code shows the server but no tools** — the URL or key never resolved. Run `/lognorth:connect`, which verifies both before saving.
 - **Client not listed above** — every client takes either a URL with headers or a stdio command. Use the JSON shape from Cursor for the first, and the `mcp-remote` command for the second. Paths for these config files move between releases, so check your client's docs if the one above is missing.
 
 ## Docs
