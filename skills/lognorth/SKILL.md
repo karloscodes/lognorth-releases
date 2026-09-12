@@ -37,4 +37,4 @@ Call `list_apps` first when a tool needs an `app_id`. One app: use it silently. 
 
 ## More detail
 
-Read [reference.md](reference.md) when you need it: what each field means, how to triage by `count_24h` and `trend`, and the REST endpoints to fall back on if the MCP server is not connected.
+Read [reference.md](reference.md) when you need it: what each field means, how to triage by `count_24h` and `trend`, and how traces fit together.

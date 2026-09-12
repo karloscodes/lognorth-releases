@@ -1,6 +1,6 @@
 # LogNorth reference
 
-Field meanings, triage rules, and the REST fallback. Read this when the tool output needs interpreting; the workflow itself is in SKILL.md.
+Field meanings and triage rules. Read this when the tool output needs interpreting; the workflow itself is in SKILL.md.
 
 ## Data model
 
@@ -51,24 +51,6 @@ Issues group identical errors. The counts are the story.
 | One event | The context object, with the error and stack trace called out |
 | Trace | Chronological list, marking where it broke |
 
-## REST fallback
+## Requirements
 
-When the MCP server is not connected, the same data is available over HTTP. Needs `LOGNORTH_URL` and `LOGNORTH_AGENT_KEY` (read-only, starts with `lgn-agent-`, from Settings > Developer). `LOGNORTH_API_KEY` is the older name for the same key.
-
-```bash
-curl -s "$LOGNORTH_URL/api/v1/agent/issues" \
-  -H "Authorization: Bearer $LOGNORTH_AGENT_KEY" | jq '.issues'
-```
-
-| Endpoint | Returns |
-|----------|---------|
-| `GET /api/v1/agent/apps` | Apps and their ids |
-| `GET /api/v1/agent/issues` | Grouped errors with counts |
-| `GET /api/v1/agent/events` | Events, filtered |
-| `GET /api/v1/agent/events/:id` | One event plus `relatedEvents` |
-
-Filters for `/events`: `app_id`, `is_error`, `search`, `limit`, `offset`, `start_time`, `end_time` (RFC3339).
-
-The agent key is separate from the app keys (`lgn-`) that SDKs use to send events, and it cannot ingest or sign in to the web UI.
-
-MCP needs LogNorth v0.16.0 or later. These REST endpoints work on earlier versions.
+MCP needs LogNorth v0.16.0 or later. The agent key is read-only, starts with `lgn-agent-`, and comes from Settings > Developer. It is separate from the app keys (`lgn-`) that SDKs use to send events, and it cannot ingest events or sign in to the web UI.

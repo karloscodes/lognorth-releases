@@ -6,7 +6,7 @@ It bundles two things. The **MCP server** gives your agent four read-only tools 
 
 Everything stays on your box. Your agent asks your instance, and only the answer reaches your AI provider.
 
-Needs LogNorth **v0.16.0 or later** for MCP. Run `lognorth update` if you are behind. The skills fall back to the REST API, which works on older versions.
+Needs LogNorth **v0.16.0 or later**. Run `lognorth update` if you are behind.
 
 ## What you get
 
