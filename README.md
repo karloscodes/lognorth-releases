@@ -106,10 +106,10 @@ code --add-mcp '{"name":"lognorth","type":"http","url":"https://logs.yoursite.co
 ### Gemini CLI
 
 ```
-gemini extensions install https://github.com/karloscodes/lognorth-releases
+gemini extensions install https://github.com/karloscodes/lognorth-releases --ref main
 ```
 
-It asks for your URL and agent key, and keeps the key in your system keychain. Then `/lognorth:investigate` works as in Claude Code.
+`--ref main` matters: this repo's GitHub releases hold the server binaries, and without it Gemini installs the latest release instead of the extension. It asks for your URL and agent key, and keeps the key in your system keychain. Then `/lognorth:investigate` works as in Claude Code.
 
 ### Cursor
 
