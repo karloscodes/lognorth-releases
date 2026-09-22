@@ -1,7 +1,7 @@
 {
   "name": "lognorth",
   "description": "Read your production logs from inside your coding agent. Bundles the LogNorth MCP server with the investigation and SDK integration skills.",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "author": {
     "name": "Carlos Castellanos",
     "url": "https://lognorth.com"

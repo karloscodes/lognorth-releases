@@ -1,9 +1,6 @@
----
-description: Investigate a LogNorth alert or issue, from the log to the commit that caused it
-argument-hint: [path or issue hash]
----
-
-Investigate `$ARGUMENTS` in production with the `lognorth` MCP tools, following the `lognorth` skill.
+description = "Investigate a LogNorth alert or issue, from the log to the commit that caused it"
+prompt = """
+Investigate `{{args}}` in production with the `lognorth` MCP tools, following the `lognorth` skill.
 
 The argument is what the alert email ended with:
 
@@ -21,3 +18,4 @@ End with:
 4. **The fix**: the change you propose. Do not edit files unless the user asks.
 
 If there are no `lognorth` tools, use the skill's shell fallback ("Without the MCP tools"). In Claude Code, `/lognorth:connect` sets the tools up.
+"""

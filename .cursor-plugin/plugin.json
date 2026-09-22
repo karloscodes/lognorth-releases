@@ -1,0 +1,30 @@
+{
+  "name": "lognorth",
+  "description": "Read your production logs from inside your coding agent: alerts, issues, failing requests, and traces from your self-hosted LogNorth.",
+  "version": "0.18.0",
+  "commands": "./commands/investigate.md",
+  "variables": {
+    "type": "object",
+    "properties": {
+      "LOGNORTH_URL": {
+        "type": "string",
+        "title": "LogNorth URL",
+        "description": "Your LogNorth address, for example https://logs.yoursite.com"
+      },
+      "LOGNORTH_AGENT_KEY": {
+        "type": "string",
+        "title": "Agent key",
+        "description": "Read-only key from Settings > Developer in LogNorth. Starts with lgn-agent-."
+      }
+    },
+    "required": ["LOGNORTH_URL", "LOGNORTH_AGENT_KEY"]
+  },
+  "mcpServers": {
+    "lognorth": {
+      "url": "${LOGNORTH_URL}/mcp",
+      "headers": {
+        "Authorization": "Bearer ${LOGNORTH_AGENT_KEY}"
+      }
+    }
+  }
+}

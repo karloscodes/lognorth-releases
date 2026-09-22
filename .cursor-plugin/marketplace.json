@@ -1,0 +1,16 @@
+{
+  "name": "karloscodes",
+  "owner": {
+    "name": "Carlos Castellanos"
+  },
+  "metadata": {
+    "description": "LogNorth: self-hosted logging you own."
+  },
+  "plugins": [
+    {
+      "name": "lognorth",
+      "source": "./",
+      "description": "Read your production logs from inside your coding agent."
+    }
+  ]
+}

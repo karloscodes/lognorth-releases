@@ -6,6 +6,8 @@ It bundles two things. The **MCP server** gives your agent six read-only tools o
 
 Everything stays on your box. Your agent asks your instance, and only the answer reaches your AI provider.
 
+It installs as a plugin in Claude Code, Codex, GitHub Copilot CLI, VS Code, and Gemini CLI, from this one repo.
+
 Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/lognorth:investigate` need the release after v0.16.2. Run `lognorth update` if you are behind.
 
 ## What you get
@@ -67,6 +69,48 @@ claude mcp add --transport http lognorth https://logs.yoursite.com/mcp \
   --header "Authorization: Bearer lgn-agent-..."
 ```
 
+### Codex
+
+```
+codex plugin marketplace add karloscodes/lognorth-releases
+codex plugin add lognorth@karloscodes
+```
+
+That installs the skills. For the native tools too, add the server once. Codex reads the key from your environment each session:
+
+```bash
+codex mcp add lognorth --url https://logs.yoursite.com/mcp --bearer-token-env-var LOGNORTH_AGENT_KEY
+```
+
+### GitHub Copilot CLI
+
+```
+copilot plugin marketplace add karloscodes/lognorth-releases
+copilot plugin install lognorth@karloscodes
+```
+
+### VS Code, with Copilot
+
+Add the marketplace to your settings, then install **lognorth** from the Extensions view (search `@agentPlugins`):
+
+```json
+"chat.plugins.marketplaces": ["karloscodes/lognorth-releases"]
+```
+
+For the native tools, add the server:
+
+```bash
+code --add-mcp '{"name":"lognorth","type":"http","url":"https://logs.yoursite.com/mcp","headers":{"Authorization":"Bearer lgn-agent-..."}}'
+```
+
+### Gemini CLI
+
+```
+gemini extensions install https://github.com/karloscodes/lognorth-releases
+```
+
+It asks for your URL and agent key, and keeps the key in your system keychain. Then `/lognorth:investigate` works as in Claude Code.
+
 ### Cursor
 
 `~/.cursor/mcp.json` for every project, or `.cursor/mcp.json` for one:
@@ -76,41 +120,6 @@ claude mcp add --transport http lognorth https://logs.yoursite.com/mcp \
   "mcpServers": {
     "lognorth": {
       "url": "https://logs.yoursite.com/mcp",
-      "headers": { "Authorization": "Bearer lgn-agent-..." }
-    }
-  }
-}
-```
-
-### VS Code, with Copilot
-
-```bash
-code --add-mcp '{"name":"lognorth","type":"http","url":"https://logs.yoursite.com/mcp","headers":{"Authorization":"Bearer lgn-agent-..."}}'
-```
-
-Or commit `.vscode/mcp.json` so the team gets it:
-
-```json
-{
-  "servers": {
-    "lognorth": {
-      "type": "http",
-      "url": "https://logs.yoursite.com/mcp",
-      "headers": { "Authorization": "Bearer lgn-agent-..." }
-    }
-  }
-}
-```
-
-### Gemini CLI
-
-`~/.gemini/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "lognorth": {
-      "httpUrl": "https://logs.yoursite.com/mcp",
       "headers": { "Authorization": "Bearer lgn-agent-..." }
     }
   }
@@ -132,23 +141,9 @@ Or commit `.vscode/mcp.json` so the team gets it:
 }
 ```
 
-### Codex CLI, Zed, and other stdio-only clients
+### Zed, and other stdio-only clients
 
-Some clients still speak only stdio. Bridge them with `mcp-remote`, which turns a stdio client into an HTTP one.
-
-Codex CLI, in `~/.codex/config.toml`:
-
-```toml
-[mcp_servers.lognorth]
-command = "npx"
-args = [
-  "-y", "mcp-remote",
-  "https://logs.yoursite.com/mcp",
-  "--header", "Authorization: Bearer lgn-agent-..."
-]
-```
-
-Zed, in `settings.json`:
+Bridge them with `mcp-remote`, which turns a stdio client into an HTTP one. Zed, in `settings.json`:
 
 ```json
 {
@@ -164,7 +159,16 @@ Zed, in `settings.json`:
 }
 ```
 
-The same `npx -y mcp-remote <url> --header "Authorization: Bearer <key>"` command works for any client that accepts a stdio command.
+### Any agent: the skills and two variables
+
+The skills work even where the MCP tools are not connected. They call the same endpoint over HTTPS with `curl`, using two variables from your shell profile:
+
+```bash
+export LOGNORTH_URL=https://logs.yoursite.com
+export LOGNORTH_AGENT_KEY=lgn-agent-...
+```
+
+For an agent without plugins, copy `skills/lognorth` and `skills/lognorth-integrate` into its skills folder.
 
 ## Then ask
 
