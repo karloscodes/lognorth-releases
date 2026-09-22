@@ -37,28 +37,31 @@ There is no tool that writes, mutes, or deletes. The agent can look, never touch
 
 ### Claude Code
 
+Three commands, **typed one at a time**, each followed by Enter. They are not a block to paste together.
+
 ```
 /plugin marketplace add karloscodes/lognorth-releases
+```
+
+```
 /plugin install lognorth
+```
+
+```
 /lognorth:connect
 ```
 
-`/lognorth:connect` asks for the URL and the key, checks them against your server before saving anything, and stores them in `~/.claude/settings.json` so every project and every session picks them up. Restart, then `/mcp` shows the server.
+If you see a prompt asking you to "Enter marketplace source", the first command ran without its argument. Type just `karloscodes/lognorth-releases` there, nothing else.
 
-Pass them inline if you prefer: `/lognorth:connect https://logs.yoursite.com lgn-agent-...`
+`/lognorth:connect` asks for the URL and the key, checks them against your server before saving anything, and stores them where Claude Code picks them up in every project and session. Restart, then `/mcp` shows the server.
 
-It saves to `settings.json` rather than telling you to export shell variables, because a GUI-launched client does not inherit your shell. If you would rather manage it yourself, export the two variables and skip the command:
+Pass them on the same line if you prefer: `/lognorth:connect https://logs.yoursite.com lgn-agent-...`
 
-```bash
-export LOGNORTH_URL="https://logs.yoursite.com"
-export LOGNORTH_AGENT_KEY="lgn-agent-..."
-```
-
-### Claude Code — MCP only
+### Claude Code, without the plugin
 
 ```bash
-claude mcp add --transport http lognorth "$LOGNORTH_URL/mcp" \
-  --header "Authorization: Bearer $LOGNORTH_AGENT_KEY"
+claude mcp add --transport http lognorth https://logs.yoursite.com/mcp \
+  --header "Authorization: Bearer lgn-agent-..."
 ```
 
 ### Cursor
@@ -186,8 +189,7 @@ box is up. The timeout is Stripe-side.
 
 ## Docs
 
-- [MCP setup](https://lognorth.com/docs/integrations/mcp/)
-- [Agent API reference](https://lognorth.com/docs/integrations/ai-agents/)
+- [MCP setup and every client's config](https://lognorth.com/docs/integrations/mcp/)
 - [All docs](https://lognorth.com/docs/)
 
 ## Releases
