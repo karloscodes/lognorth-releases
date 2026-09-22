@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "LogNorth: self-hosted logging you own. Logs, errors, alerts, and uptime from one binary.",
-    "version": "0.16.0"
+    "version": "0.17.0"
   },
   "plugins": [
     {
       "name": "lognorth",
       "source": "./",
-      "description": "Read your production logs from inside your coding agent. MCP server plus the debugging and SDK integration skills.",
-      "version": "0.16.0",
+      "description": "Read your production logs from inside your coding agent. MCP server plus the investigation and SDK integration skills.",
+      "version": "0.17.0",
       "category": "observability",
       "keywords": [
         "logs",

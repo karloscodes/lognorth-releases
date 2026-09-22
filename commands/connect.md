@@ -59,7 +59,7 @@ Create the file with just that object if it does not exist. Keep the existing in
 
 ## 4. Confirm
 
-Tell the user: connected to `<url>`, verified, and the tools appear after a restart because MCP config is read at startup. Then `/mcp` lists the server and `list_issues` is the fastest way to see it working.
+Tell the user: connected to `<url>`, verified, and the tools appear after a restart because MCP config is read at startup. Then `/mcp` lists the server, and `/lognorth:investigate` with no argument shows what is wrong in production right now.
 
 ## Other clients
 

@@ -2,29 +2,32 @@
 
 Your agent should not have to ask you what production is doing. This plugin connects it straight to your [LogNorth](https://lognorth.com) server: it reads the failing requests, follows the trace, and tells you what broke, in the same pane as the code.
 
-It bundles two things. The **MCP server** gives your agent four read-only tools over your logs. The **skills** teach it what the data means and how to triage an issue.
+It bundles two things. The **MCP server** gives your agent six read-only tools over your logs and alerts. The **skills** teach it how to go from an alert to the line of code and the commit that caused it.
 
 Everything stays on your box. Your agent asks your instance, and only the answer reaches your AI provider.
 
-Needs LogNorth **v0.16.0 or later**. Run `lognorth update` if you are behind.
+Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/lognorth:investigate` need the release after v0.16.2. Run `lognorth update` if you are behind.
 
 ## What you get
 
 | Tool | What it does |
 |------|--------------|
 | `list_apps` | Your apps and their ids |
-| `search_logs` | Find requests by text, errors only, and time window |
-| `get_event` | One event with its full context and every event in its trace |
+| `list_alerts` | What is alerting now: error rate spikes, traffic drops, apps down, each against its normal level |
+| `endpoint_timeline` | Requests and errors for one endpoint over time, to see when a problem started |
 | `list_issues` | Grouped errors with occurrence counts and trend |
+| `search_logs` | Find requests by text, issue, errors only, and time window |
+| `get_event` | One event with its full context and every event in its trace |
 
 | Skill | What it does |
 |-------|--------------|
-| `lognorth` | Debug production: triage issues, follow traces, read context |
+| `lognorth` | Investigate production: from an alert to the failing request, the code, and the commit |
 | `lognorth-integrate` | Add the LogNorth SDK to a Go, Node, or Rails project |
 
 | Command | What it does |
 |---------|--------------|
 | `/lognorth:connect` | Point this machine at your server: asks, verifies, saves |
+| `/lognorth:investigate` | Investigate an alert or issue. Every LogNorth alert email ends with this command, ready to paste |
 
 There is no tool that writes, mutes, or deletes. The agent can look, never touch.
 
@@ -165,19 +168,23 @@ The same `npx -y mcp-remote <url> --header "Authorization: Bearer <key>"` comman
 
 ## Then ask
 
+An alert email ends with a line like this. Paste it into your agent:
+
 ```
-You: the checkout endpoint is throwing 500s, what's happening?
+/lognorth:investigate /api/checkout
 
-Agent: [list_issues, then search_logs errors_only]
+Agent: [list_alerts, endpoint_timeline, search_logs, get_event]
 
-Three failures on POST /api/checkout in the last 12 minutes, all the
-same error: "Stripe timeout after 30s", 121-123ms each.
+/api/checkout fails 8% of the time since 14:05, normally 1%. All 212
+failures are "Stripe timeout after 2s" at app/payments/charge.rb:41.
 
-[get_event on the first one]
+[git log around 14:05]
 
-The trace shows GET /api/health succeeded in the same window, so the
-box is up. The timeout is Stripe-side.
+a3f9c1e, deployed 14:02, cut the Stripe timeout from 30s to 2s.
+Stripe's p99 today is 3.1s. Restore the 30s timeout; the diff is below.
 ```
+
+Or just ask: "is anything broken in production?"
 
 ## If it does not connect
 

@@ -1,40 +1,39 @@
 ---
 name: lognorth
-description: Use when debugging production errors, checking logs, or the user mentions "lognorth". Reads a self-hosted LogNorth instance through its MCP tools.
+description: Use when debugging production errors, investigating an alert, checking logs, or the user mentions "lognorth". Reads a self-hosted LogNorth instance through its MCP tools, then finds the cause in the code.
 ---
 
 # LogNorth
 
-The user's production log is available through the `lognorth` MCP tools. Read it before you guess.
+The user's production log is available through the `lognorth` MCP tools. You also have their code and its git history. A hosted log tool has only the first. Use both: the log says what broke and when, the repo says why.
 
-## The tools
+All tools are read-only. Nothing here writes, mutes, or deletes.
 
-| Tool | Arguments |
-|------|-----------|
-| `list_issues` | `app_id` |
-| `search_logs` | `search`, `errors_only`, `since` (`15m`, `2h`, `7d`), `app_id`, `limit` (max 200) |
-| `get_event` | `id` |
-| `list_apps` | none |
+## Investigate
 
-All read-only. Nothing here writes, mutes, or deletes.
+Go in this order. Stop as soon as you know the cause.
 
-## How to use them
+1. **What is wrong now.** `list_alerts` for rate alerts (spike, drift, silence) and apps that are down. `list_issues` for grouped errors. When the user names a path or an issue, start from it.
+2. **When it started.** `endpoint_timeline` for the path. Find the first step where errors rose or traffic fell, and compare it with the normal level in the response.
+3. **What failed.** `search_logs` with `errors_only: true`, `issue: <hash>` when you have one, and `since` / `until` around the start time.
+4. **The whole request.** `get_event` on one failure. Read the trace: what succeeded just before the failure rules out half the causes.
+5. **The code.** Open `error_file:error_line` from the event. Then run `git log --since=<start minus 1 hour> --until=<start>` and look for the change that shipped just before the problem began.
+6. **The fix.** Name the cause, cite the event id and the commit, and propose the change. Do not apply it unless the user asks.
 
-1. **`list_issues`** — what is broken, grouped, with counts and trend.
-2. **`search_logs`** with `errors_only: true` — the actual failing requests.
-3. **`get_event`** on one of them — full context plus every event in the same trace.
-
-Three calls to a root cause. Start narrow: `search_logs` defaults to the last hour and 20 events, and that usually answers the question. Widen with `since` and `limit` only when it does not.
-
-Call `list_apps` first when a tool needs an `app_id`. One app: use it silently. Several, and the user did not say which: ask.
+Call `list_apps` when a tool needs an `app_id`. One app: use it silently. Several, and the user did not say which: ask.
 
 ## Rules
 
-- **Lead with the answer**, not the JSON. "Three checkout failures in 12 minutes, all Stripe timeouts" beats a table the user has to read for themselves.
-- **Check the volume before calling it urgent.** One error in a thousand requests is normal.
-- **Read the trace before naming a cause.** What succeeded just before the failure rules out half the candidates.
-- **Never claim you fixed, muted, or resolved anything.** You can only read.
+- **Lead with the answer**, not the JSON. "Checkout fails 8% of the time since 14:05, normally 1%. All Stripe timeouts, starting with a3f9c1e, which cut the timeout to 2s" beats a table.
+- **Trust the alert's baseline.** An alert compares against the same time of day on earlier days, so it is already more than "errors went up". Quote its normal level.
+- **Check the volume before calling it urgent.** One error in a thousand requests is normal. An issue with a high 7-day count and a falling trend is fading, so say that.
+- **Say when you are guessing.** No trace, no `error_file`, or no commit near the start time means the cause is a hypothesis. Label it.
+- **Never claim you fixed, muted, or resolved anything in LogNorth.** You can only read.
+
+## When a tool is missing
+
+`list_alerts`, `endpoint_timeline`, and the `issue` and `until` arguments of `search_logs` need a newer LogNorth. If they are not in the tool list, tell the user to run `lognorth update` on the server, then continue with the tools you have. If no `lognorth` tools appear at all, run `/lognorth:connect`.
 
 ## More detail
 
-Read [reference.md](reference.md) when you need it: what each field means, how to triage by `count_24h` and `trend`, and how traces fit together.
+Read [reference.md](reference.md) when you need it: what each field means, how alerts decide, and how traces fit together.
