@@ -6,7 +6,7 @@ allowed-tools: Bash(curl:*), Read, Edit, Write
 
 Connect the user's LogNorth server to the `lognorth` MCP server.
 
-The plugin's MCP config reads `${LOGNORTH_URL}` and `${LOGNORTH_AGENT_KEY}`. Shell exports do not reach a GUI-launched client, so store them where Claude Code itself will apply them: the `env` block of `~/.claude/settings.json`.
+The plugin's MCP config reads `${LOGNORTH_URL}` and `${LOGNORTH_AGENT_KEY}` from the environment. The URL goes in the `env` block of `~/.claude/settings.json`. The key never goes into a config file: many people keep `~/.claude/settings.json` in a dotfiles repo, and a key committed there is public.
 
 Arguments, if given: `$1` is the URL, `$2` is the agent key.
 
@@ -44,18 +44,28 @@ Do not write config for a setup that does not answer. Fix it with the user first
 
 ## 3. Store them
 
-Read `~/.claude/settings.json`, then add or update its `env` block, preserving everything else in the file:
+**The URL.** Read `~/.claude/settings.json`, then add or update its `env` block, preserving everything else in the file:
 
 ```json
 {
   "env": {
-    "LOGNORTH_URL": "https://logs.yoursite.com",
-    "LOGNORTH_AGENT_KEY": "lgn-agent-..."
+    "LOGNORTH_URL": "https://logs.yoursite.com"
   }
 }
 ```
 
 Create the file with just that object if it does not exist. Keep the existing indentation style.
+
+**The key.** It goes in the environment as `LOGNORTH_AGENT_KEY`, never in `settings.json`. Before writing it into any file, check that git does not track that file:
+
+```bash
+f="$(readlink -f ~/.zshrc)"; git -C "$(dirname "$f")" ls-files --error-unmatch "$f" >/dev/null 2>&1 && echo tracked
+```
+
+- Not tracked: offer to add `export LOGNORTH_AGENT_KEY=...` to the user's shell profile.
+- Tracked (a dotfiles repo): do not write it. Show the `export` line and tell the user to put it in an untracked file their profile sources (for example `~/.secrets`) or in their secret manager.
+
+If an earlier version of this command left `LOGNORTH_AGENT_KEY` in the `env` block of `~/.claude/settings.json`, remove it from there, and tell the user to regenerate the key in LogNorth if that file was ever committed.
 
 ## 4. Confirm
 
@@ -63,4 +73,4 @@ Tell the user: connected to `<url>`, verified, and the tools appear after a rest
 
 ## Other clients
 
-If the user is setting up Cursor, VS Code, Gemini CLI, Windsurf, Codex, or Zed instead, do not edit Claude Code's settings. Give them their client's config with the verified values filled in — the shapes are in the [plugin README](https://github.com/karloscodes/lognorth-releases#install) — and point out that those files hold the key in plain text, so it should not be committed.
+If the user is setting up Cursor, VS Code, Gemini CLI, Windsurf, Codex, or Zed instead, do not edit Claude Code's settings. Give them their client's config with the verified values filled in — the shapes are in the [plugin README](https://github.com/karloscodes/lognorth-releases#install) — and use the client's environment-variable syntax for the key where it has one (Codex: `--bearer-token-env-var LOGNORTH_AGENT_KEY`; Cursor: `${env:LOGNORTH_AGENT_KEY}`). Where a client can only hold the key in plain text, say so, and tell the user not to commit that file.
