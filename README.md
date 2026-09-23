@@ -202,15 +202,15 @@ Or just ask: "is anything broken in production?"
 
 ## From your terminal
 
-The same tools work without an agent. From LogNorth v0.20.0, the `lognorth` command reads your server from any machine:
+The same tools work without an agent. `north`, an open-source CLI, reads your server from any machine (LogNorth v0.20.0 or later):
 
 ```bash
-lognorth connect https://logs.yoursite.com lgn-agent-...
-lognorth tail --errors     # the log, live
-lognorth top               # endpoints, alerts, and uptime, like htop
+curl -fsSL https://lognorth.com/cli | sh   # installs north, then asks for your URL and key
+north tail --errors     # the log, live
+north top               # endpoints, alerts, and uptime, like htop
 ```
 
-It uses the same agent key and the same `LOGNORTH_URL` and `LOGNORTH_AGENT_KEY` variables. Download it from [Releases](https://github.com/karloscodes/lognorth-releases/releases): `lognorth-darwin-arm64`, `lognorth-darwin-amd64`, or the Linux builds. See [Terminal](https://lognorth.com/docs/features/terminal/).
+It uses the same agent key and the same `LOGNORTH_URL` and `LOGNORTH_AGENT_KEY` variables. Source: [karloscodes/lognorth-cli](https://github.com/karloscodes/lognorth-cli). See [Terminal](https://lognorth.com/docs/features/terminal/).
 
 ## Docs
 
