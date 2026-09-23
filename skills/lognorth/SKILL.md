@@ -13,7 +13,7 @@ All tools are read-only. Nothing here writes, mutes, or deletes.
 
 Go in this order. Stop as soon as you know the cause.
 
-1. **What is wrong now.** `list_alerts` for rate alerts (spike, drift, silence) and apps that are down. `list_issues` for grouped errors. When the user names a path or an issue, start from it.
+1. **What is wrong now.** `list_alerts` for rate alerts (spike, drift, silence) and apps that are down. `list_issues` for grouped errors. `list_endpoints` for which endpoints fail right now, most broken first. `uptime_timeline` when an app may be down: when its pings failed, and why. When the user names a path or an issue, start from it.
 2. **When it started.** `endpoint_timeline` for the path. Find the first step where errors rose or traffic fell, and compare it with the normal level in the response.
 3. **What failed.** `search_logs` with `errors_only: true`, `issue: <hash>` when you have one, and `since` / `until` around the start time.
 4. **The whole request.** `get_event` on one failure. Read the trace: what succeeded just before the failure rules out half the causes.
@@ -50,7 +50,7 @@ lognorth_mcp search_logs '{"errors_only": true, "since": "2h"}'
 
 ## When a tool is missing
 
-`list_alerts`, `endpoint_timeline`, and the `issue` and `until` arguments of `search_logs` need a newer LogNorth. If they are not in the tool list, tell the user to run `lognorth update` on the server, then continue with the tools you have. In Claude Code, if no `lognorth` tools appear at all, run `/lognorth:connect`.
+`list_alerts`, `endpoint_timeline`, and the `issue` and `until` arguments of `search_logs` need a newer LogNorth, and `list_endpoints` and `uptime_timeline` need v0.20.0. If they are not in the tool list, tell the user to run `lognorth update` on the server, then continue with the tools you have. In Claude Code, if no `lognorth` tools appear at all, run `/lognorth:connect`.
 
 ## More detail
 

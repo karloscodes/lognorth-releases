@@ -9,7 +9,7 @@ The argument is what the alert email ended with:
 
 - **A path** such as `/api/checkout`: start with `list_alerts`, then `endpoint_timeline` for that path.
 - **An issue hash** (hex characters, no slash): start with `search_logs` with `issue` set to it and `since: 7d`, then `list_issues` for its counts and trend.
-- **Nothing**: start with `list_alerts`, then `list_issues`, and take the worst one.
+- **Nothing**: start with `list_alerts`, then `list_endpoints` and `list_issues`, and take the worst one. If an app is down, start with `uptime_timeline`.
 
 Then go through the rest of the skill's steps: the failing requests, one full trace, the code at `error_file:error_line`, and the commits just before the start time.
 

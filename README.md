@@ -2,13 +2,13 @@
 
 Your agent should not have to ask you what production is doing. This plugin connects it straight to your [LogNorth](https://lognorth.com) server: it reads the failing requests, follows the trace, and tells you what broke, in the same pane as the code.
 
-It bundles two things. The **MCP server** gives your agent six read-only tools over your logs and alerts. The **skills** teach it how to go from an alert to the line of code and the commit that caused it.
+It bundles two things. The **MCP server** gives your agent eight read-only tools over your logs and alerts. The **skills** teach it how to go from an alert to the line of code and the commit that caused it.
 
 Everything stays on your box. Your agent asks your instance, and only the answer reaches your AI provider.
 
 It installs as a plugin in Claude Code, Codex, GitHub Copilot CLI, VS Code, and Gemini CLI, from this one repo.
 
-Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/lognorth:investigate` need the release after v0.16.2. Run `lognorth update` if you are behind.
+Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/lognorth:investigate` need the release after v0.16.2. `list_endpoints` and `uptime_timeline` need v0.20.0. Run `lognorth update` if you are behind.
 
 ## What you get
 
@@ -16,7 +16,9 @@ Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/l
 |------|--------------|
 | `list_apps` | Your apps and their ids |
 | `list_alerts` | What is alerting now: error rate spikes, traffic drops, apps down, each against its normal level |
+| `list_endpoints` | Every endpoint with its requests, errors, and error rate, most broken first |
 | `endpoint_timeline` | Requests and errors for one endpoint over time, to see when a problem started |
+| `uptime_timeline` | The app's uptime ping over 24 hours, and why pings failed |
 | `list_issues` | Grouped errors with occurrence counts and trend |
 | `search_logs` | Find requests by text, issue, errors only, and time window |
 | `get_event` | One event with its full context and every event in its trace |
@@ -197,6 +199,18 @@ Or just ask: "is anything broken in production?"
 - **Nothing in the tool list** — most clients only read MCP config at startup. Restart it.
 - **Claude Code shows the server but no tools** — the URL or key never resolved. Run `/lognorth:connect`, which verifies both before saving.
 - **Client not listed above** — every client takes either a URL with headers or a stdio command. Use the JSON shape from Cursor for the first, and the `mcp-remote` command for the second. Paths for these config files move between releases, so check your client's docs if the one above is missing.
+
+## From your terminal
+
+The same tools work without an agent. From LogNorth v0.20.0, the `lognorth` command reads your server from any machine:
+
+```bash
+lognorth connect https://logs.yoursite.com lgn-agent-...
+lognorth tail --errors     # the log, live
+lognorth top               # endpoints, alerts, and uptime, like htop
+```
+
+It uses the same agent key and the same `LOGNORTH_URL` and `LOGNORTH_AGENT_KEY` variables. Download it from [Releases](https://github.com/karloscodes/lognorth-releases/releases): `lognorth-darwin-arm64`, `lognorth-darwin-amd64`, or the Linux builds. See [Terminal](https://lognorth.com/docs/features/terminal/).
 
 ## Docs
 

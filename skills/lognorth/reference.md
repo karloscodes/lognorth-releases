@@ -42,6 +42,25 @@ A new endpoint needs a day of history before error rate alerts, and a week befor
 
 `endpoint_timeline` returns one point per step: `requests`, `errors`, `error_rate`. Steps are 5 minutes up to 24 hours back and 1 hour beyond. A step with 0 requests is a real gap in traffic, not missing data. `normal` is for the current time of day.
 
+## Endpoints
+
+`list_endpoints` returns one row per endpoint over a window (`since`, default `1h`), most broken first: `path`, `total` requests, `errors`, `error_rate` in %, and `avg_duration` in ms. Use it to find the endpoint, then `endpoint_timeline` to find when it started.
+
+## Uptime
+
+`uptime_timeline` is the app's URL ping, checked every minute.
+
+| Field | Description |
+|-------|-------------|
+| `status` | `up`, `failing` (a ping failed, not yet 3 in a row), `down`, `pending` (no ping yet), `off`, or `none` (no URL) |
+| `latency_ms` | The last ping's response time |
+| `uptime_24h` | % of the last day's pings that were up |
+| `down_since` | When it went down, if it is down |
+| `bars` | 96 bars of 15 minutes, oldest first: `checks`, `fails`, and `failures`, why they failed (`503`, `no answer within 5s`) |
+| `last_failure` | The most recent failed ping: time, status, latency, error |
+
+A 5xx, a timeout (5 seconds), or no connection is a failure. A 4xx means the app answered, so it counts as up. 3 failures in a row mark the app down. When failures line up with errors in `search_logs`, the app answered and failed. When the log goes quiet at the same time, nothing reached the app: it stopped, or the proxy or network in front of it failed.
+
 ## Issues
 
 Issues group identical errors. The counts are the story.
@@ -80,4 +99,4 @@ Issues group identical errors. The counts are the story.
 
 ## Requirements
 
-MCP needs LogNorth v0.16.0 or later. `list_alerts`, `endpoint_timeline`, and the `issue` and `until` arguments need the release after v0.16.2. The agent key is read-only, starts with `lgn-agent-`, and comes from Settings > Developer. It is separate from the app keys (`lgn-`) that SDKs use to send events, and it cannot ingest events or sign in to the web UI.
+MCP needs LogNorth v0.16.0 or later. `list_alerts`, `endpoint_timeline`, and the `issue` and `until` arguments need the release after v0.16.2. `list_endpoints`, `uptime_timeline`, and the `after_id` argument need v0.20.0. The agent key is read-only, starts with `lgn-agent-`, and comes from Settings > Developer. It is separate from the app keys (`lgn-`) that SDKs use to send events, and it cannot ingest events or sign in to the web UI.

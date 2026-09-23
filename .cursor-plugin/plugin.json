@@ -1,7 +1,7 @@
 {
   "name": "lognorth",
   "description": "Read your production logs from inside your coding agent: alerts, issues, failing requests, and traces from your self-hosted LogNorth.",
-  "version": "0.18.0",
+  "version": "0.20.0",
   "commands": "./commands/investigate.md",
   "variables": {
     "type": "object",
