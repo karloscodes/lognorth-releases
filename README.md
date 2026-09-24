@@ -49,10 +49,11 @@ It installs `north`, a small open-source binary. Then it checks the key against 
 ✓ Connected to logs.yoursite.com: shop-prod, shop-staging
   Saved to ~/.config/lognorth/remote.json, readable by you only
 
-Add LogNorth to Claude Code, Codex and Gemini CLI? [Y/n]
+Add LogNorth to Claude Code, Codex, Gemini CLI and Cursor? [Y/n]
   ✓ Claude Code  plugin lognorth
   ✓ Codex        plugin lognorth
   ✓ Gemini CLI   extension lognorth
+  ✓ Cursor       ~/.cursor/mcp.json
 
 Restart your agent, then ask it: what is broken in production?
 ```
@@ -79,7 +80,7 @@ After `north connect`, any MCP client takes the same local command:
 }
 ```
 
-- **Cursor**: the JSON above, in `~/.cursor/mcp.json`.
+- **Cursor**: `north agents` writes the JSON above into `~/.cursor/mcp.json`.
 - **GitHub Copilot CLI**: `copilot plugin marketplace add karloscodes/lognorth-releases`, then `copilot plugin install lognorth@karloscodes`.
 - **VS Code with Copilot**: add `"chat.plugins.marketplaces": ["karloscodes/lognorth-releases"]` to your settings, then install **lognorth** from the Extensions view (search `@agentPlugins`).
 - **Windsurf**: the JSON above, in `~/.codeium/windsurf/mcp_config.json`.
@@ -137,6 +138,7 @@ Run `north` in a terminal. It says which server it reads, or that it is not conn
 north tail --errors     # the log, live
 north top               # endpoints, alerts, and uptime, like htop
 north call list_alerts  # any tool, as JSON
+north update            # the latest north
 ```
 
 Source: [karloscodes/lognorth-cli](https://github.com/karloscodes/lognorth-cli). See [Terminal](https://lognorth.com/docs/features/terminal/).
