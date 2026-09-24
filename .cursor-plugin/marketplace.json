@@ -4,13 +4,15 @@
     "name": "Carlos Castellanos"
   },
   "metadata": {
-    "description": "LogNorth: self-hosted logging you own."
+    "description": "LogNorth: self-hosted logging you own.",
+    "version": "0.22.0"
   },
   "plugins": [
     {
       "name": "lognorth",
       "source": "./",
-      "description": "Read your production logs from inside your coding agent."
+      "description": "Read your production logs from inside Cursor: alerts, failing endpoints, grouped errors, uptime, and full request traces from your self-hosted LogNorth. Read-only.",
+      "category": "observability"
     }
   ]
 }

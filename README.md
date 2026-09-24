@@ -80,7 +80,7 @@ After `north connect`, any MCP client takes the same local command:
 }
 ```
 
-- **Cursor**: `north agents` writes the JSON above into `~/.cursor/mcp.json`.
+- **Cursor**: `north agents` writes the JSON above into `~/.cursor/mcp.json`. The Cursor Marketplace plugin connects by URL instead: set `LOGNORTH_URL` and `LOGNORTH_AGENT_KEY` under **Plugins > Configure** in the Cursor dashboard. That also works for Cursor cloud agents, where `north` cannot run.
 - **GitHub Copilot CLI**: `copilot plugin marketplace add karloscodes/lognorth-releases`, then `copilot plugin install lognorth@karloscodes`.
 - **VS Code with Copilot**: add `"chat.plugins.marketplaces": ["karloscodes/lognorth-releases"]` to your settings, then install **lognorth** from the Extensions view (search `@agentPlugins`).
 - **Windsurf**: the JSON above, in `~/.codeium/windsurf/mcp_config.json`.
