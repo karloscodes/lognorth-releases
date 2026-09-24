@@ -30,7 +30,7 @@ Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/l
 
 | Command | What it does |
 |---------|--------------|
-| `/lognorth:connect` | Install `north` and connect it to your server: asks, verifies, saves |
+| `/lognorth:connect` | Check the connection, and say what to run when it is missing |
 | `/lognorth:investigate` | Investigate an alert or issue. Every LogNorth alert email ends with this command, ready to paste |
 
 There is no tool that writes, mutes, or deletes. The agent can look, never touch.
@@ -63,21 +63,9 @@ The agent key is read-only and starts with `lgn-agent-`. It is not the app key y
 
 Install an agent later? Run `north agents`.
 
-### From inside Claude Code
+### From the plugin marketplace
 
-```
-/plugin marketplace add karloscodes/lognorth-releases
-```
-
-```
-/plugin install lognorth
-```
-
-```
-/lognorth:connect https://logs.yoursite.com lgn-agent-...
-```
-
-Type them one at a time. `/lognorth:connect` installs `north` if it is missing and connects it. If you see "Enter marketplace source", type just `karloscodes/lognorth-releases` there.
+You can also install the plugin first: `/plugin marketplace add karloscodes/lognorth-releases`, then `/plugin install lognorth`. It still connects through the terminal command above, so the key never goes through the chat. `/lognorth:connect` checks the connection and tells you what to run.
 
 ### Other agents
 

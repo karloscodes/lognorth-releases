@@ -1,5 +1,5 @@
 {
   "name": "lognorth",
-  "version": "0.21.0",
+  "version": "0.21.1",
   "description": "Read your production logs from inside your coding agent: alerts, issues, failing requests, and traces from your self-hosted LogNorth."
 }
