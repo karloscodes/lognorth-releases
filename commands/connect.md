@@ -1,76 +1,46 @@
 ---
 description: Connect this machine to a LogNorth server so the MCP tools work
 argument-hint: [url] [agent-key]
-allowed-tools: Bash(curl:*), Read, Edit, Write
+allowed-tools: Bash(north:*), Bash(command -v north), Bash(curl -fsSL https\://lognorth.com/cli:*)
 ---
 
-Connect the user's LogNorth server to the `lognorth` MCP server.
-
-The plugin's MCP config reads `${LOGNORTH_URL}` and `${LOGNORTH_AGENT_KEY}` from the environment. The URL goes in the `env` block of `~/.claude/settings.json`. The key never goes into a config file: many people keep `~/.claude/settings.json` in a dotfiles repo, and a key committed there is public.
+Connect the user's LogNorth server. The plugin's MCP server is `north mcp`, a small local command that reads the connection from `~/.config/lognorth/remote.json`. `north connect` checks the URL and key against the server and writes that file. No agent config holds the key.
 
 Arguments, if given: `$1` is the URL, `$2` is the agent key.
 
 ## 1. Collect the two values
 
-Use the arguments when present. Otherwise check, in order, and only ask for what is still missing:
+Use the arguments when present. Ask only for what is missing:
 
-- `env | grep -E '^LOGNORTH_(URL|AGENT_KEY|API_KEY)='`
-- the `env` block already in `~/.claude/settings.json`
-
-When you have to ask:
-
-- **URL** — their LogNorth address, for example `https://logs.yoursite.com`. Strip any trailing slash and any trailing `/mcp`.
-- **Agent key** — from **Settings > Developer** in LogNorth. It starts with `lgn-agent-`. If they paste something starting with `lgn-` but not `lgn-agent-`, that is an app key for sending events; tell them and ask for the agent key instead.
+- **URL**: their LogNorth address, for example `https://logs.yoursite.com`.
+- **Agent key**: from **Settings > Developer** in LogNorth. It starts with `lgn-agent-`. A key that starts with `lgn-` but not `lgn-agent-` is an app key for sending events; tell them and ask for the agent key.
 
 Never echo the key back in full. Show the last four characters at most.
 
-## 2. Verify before writing anything
+## 2. Install north if it is missing
 
 ```bash
-curl -sS -o /dev/null -w '%{http_code}' -X POST "<url>/mcp" \
-  -H "Authorization: Bearer <key>" \
-  -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+command -v north
 ```
 
-| Code | Meaning | Say this |
-|------|---------|----------|
-| `200` | Works | Continue to step 3. |
-| `401` | Key rejected | Wrong key, or an app key. Get the agent key from Settings > Developer. |
-| `404` | No MCP endpoint | The server predates v0.16.0. Run `lognorth update` on it. |
-| `000` | Unreachable | Check the URL, and whether the host is reachable from here. |
-
-Do not write config for a setup that does not answer. Fix it with the user first.
-
-## 3. Store them
-
-**The URL.** Read `~/.claude/settings.json`, then add or update its `env` block, preserving everything else in the file:
-
-```json
-{
-  "env": {
-    "LOGNORTH_URL": "https://logs.yoursite.com"
-  }
-}
-```
-
-Create the file with just that object if it does not exist. Keep the existing indentation style.
-
-**The key.** It goes in the environment as `LOGNORTH_AGENT_KEY`, never in `settings.json`. Before writing it into any file, check that git does not track that file:
+If that prints nothing, install it. The installer downloads one binary, checks its checksum, and needs no sudo:
 
 ```bash
-f="$(readlink -f ~/.zshrc)"; git -C "$(dirname "$f")" ls-files --error-unmatch "$f" >/dev/null 2>&1 && echo tracked
+curl -fsSL https://lognorth.com/cli | sh
 ```
 
-- Not tracked: offer to add `export LOGNORTH_AGENT_KEY=...` to the user's shell profile.
-- Tracked (a dotfiles repo): do not write it. Show the `export` line and tell the user to put it in an untracked file their profile sources (for example `~/.secrets`) or in their secret manager.
+If the installer says to add a folder to the `PATH`, tell the user: the agent starts `north mcp` by name, so it must be on the `PATH`.
 
-If an earlier version of this command left `LOGNORTH_AGENT_KEY` in the `env` block of `~/.claude/settings.json`, remove it from there, and tell the user to regenerate the key in LogNorth if that file was ever committed.
+## 3. Connect
+
+```bash
+north connect <url> <key>
+```
+
+It verifies before it saves. When it fails, it says why: a rejected key, an app key, a server it cannot reach, or a LogNorth too old for MCP (`lognorth update` on the server fixes that one). Relay the message and fix it with the user.
 
 ## 4. Confirm
 
-Tell the user: connected to `<url>`, verified, and the tools appear after a restart because MCP config is read at startup. Then `/mcp` lists the server, and `/lognorth:investigate` with no argument shows what is wrong in production right now.
+Tell the user: connected to `<url>`. The tools appear after a restart, because MCP config is read at startup. After that, `north connect` with a new key takes effect at once, with no restart. `/lognorth:investigate` with no argument shows what is wrong in production now.
 
-## Other clients
-
-If the user is setting up Cursor, VS Code, Gemini CLI, Windsurf, Codex, or Zed instead, do not edit Claude Code's settings. Give them their client's config with the verified values filled in — the shapes are in the [plugin README](https://github.com/karloscodes/lognorth-releases#install) — and use the client's environment-variable syntax for the key where it has one (Codex: `--bearer-token-env-var LOGNORTH_AGENT_KEY`; Cursor: `${env:LOGNORTH_AGENT_KEY}`). Where a client can only hold the key in plain text, say so, and tell the user not to commit that file.
+If they also use Codex, Gemini CLI, or Cursor, `north agents` in a terminal adds LogNorth to those too.

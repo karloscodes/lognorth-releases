@@ -17,5 +17,5 @@ End with:
 3. **The cause**: the event id, the file and line, and the commit if you found one. Say if it is a guess.
 4. **The fix**: the change you propose. Do not edit files unless the user asks.
 
-If there are no `lognorth` tools, use the skill's shell fallback ("Without the MCP tools"). In Claude Code, `/lognorth:connect` sets the tools up.
+If there are no `lognorth` tools, use `north call` from the skill's "Without the MCP tools".
 """

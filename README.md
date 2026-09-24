@@ -6,7 +6,7 @@ It bundles two things. The **MCP server** gives your agent eight read-only tools
 
 Everything stays on your box. Your agent asks your instance, and only the answer reaches your AI provider.
 
-It installs as a plugin in Claude Code, Codex, GitHub Copilot CLI, VS Code, and Gemini CLI, from this one repo.
+It installs as a plugin in Claude Code, Codex, GitHub Copilot CLI, VS Code, and Gemini CLI, from one terminal command.
 
 Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/lognorth:investigate` need the release after v0.16.2. `list_endpoints` and `uptime_timeline` need v0.20.0. Run `lognorth update` if you are behind.
 
@@ -30,21 +30,40 @@ Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/l
 
 | Command | What it does |
 |---------|--------------|
-| `/lognorth:connect` | Point this machine at your server: asks, verifies, saves |
+| `/lognorth:connect` | Install `north` and connect it to your server: asks, verifies, saves |
 | `/lognorth:investigate` | Investigate an alert or issue. Every LogNorth alert email ends with this command, ready to paste |
 
 There is no tool that writes, mutes, or deletes. The agent can look, never touch.
 
-## First, two values
-
-1. **Your URL**, for example `https://logs.yoursite.com`.
-2. **An agent key** from **Settings > Developer** in LogNorth. It is read-only and starts with `lgn-agent-`. It is not the app key your SDKs use to send events.
-
 ## Install
 
-### Claude Code
+One command in your terminal. Copy it from **Settings > Developer** in LogNorth, where it has your URL and agent key filled in:
 
-Three commands, **typed one at a time**, each followed by Enter. They are not a block to paste together.
+```bash
+curl -fsSL https://lognorth.com/cli | sh -s -- https://logs.yoursite.com lgn-agent-...
+```
+
+It installs `north`, a small open-source binary. Then it checks the key against your server, saves the connection to `~/.config/lognorth/remote.json` (readable by you only), and offers to add LogNorth to every agent it finds:
+
+```
+✓ Connected to logs.yoursite.com: shop-prod, shop-staging
+  Saved to ~/.config/lognorth/remote.json, readable by you only
+
+Add LogNorth to Claude Code, Codex and Gemini CLI? [Y/n]
+  ✓ Claude Code  plugin lognorth
+  ✓ Codex        plugin lognorth
+  ✓ Gemini CLI   extension lognorth
+
+Restart your agent, then ask it: what is broken in production?
+```
+
+The agent key is read-only and starts with `lgn-agent-`. It is not the app key your SDKs use to send events.
+
+**How it connects.** Every agent starts `north mcp`, which relays its calls to your server over HTTPS. The URL and the key live in that one file, never in an agent config or a dotfiles repo. A new key is one `north connect` away, and running agents pick it up on their next call.
+
+Install an agent later? Run `north agents`.
+
+### From inside Claude Code
 
 ```
 /plugin marketplace add karloscodes/lognorth-releases
@@ -55,120 +74,41 @@ Three commands, **typed one at a time**, each followed by Enter. They are not a 
 ```
 
 ```
-/lognorth:connect
+/lognorth:connect https://logs.yoursite.com lgn-agent-...
 ```
 
-If you see a prompt asking you to "Enter marketplace source", the first command ran without its argument. Type just `karloscodes/lognorth-releases` there, nothing else.
+Type them one at a time. `/lognorth:connect` installs `north` if it is missing and connects it. If you see "Enter marketplace source", type just `karloscodes/lognorth-releases` there.
 
-`/lognorth:connect` asks for the URL and the key, checks them against your server before saving anything, and stores them where Claude Code picks them up in every project and session. Restart, then `/mcp` shows the server.
+### Other agents
 
-Pass them on the same line if you prefer: `/lognorth:connect https://logs.yoursite.com lgn-agent-...`
+After `north connect`, any MCP client takes the same local command:
 
-### Claude Code, without the plugin
+```json
+{
+  "mcpServers": {
+    "lognorth": { "command": "north", "args": ["mcp"] }
+  }
+}
+```
+
+- **Cursor**: the JSON above, in `~/.cursor/mcp.json`.
+- **GitHub Copilot CLI**: `copilot plugin marketplace add karloscodes/lognorth-releases`, then `copilot plugin install lognorth@karloscodes`.
+- **VS Code with Copilot**: add `"chat.plugins.marketplaces": ["karloscodes/lognorth-releases"]` to your settings, then install **lognorth** from the Extensions view (search `@agentPlugins`).
+- **Windsurf**: the JSON above, in `~/.codeium/windsurf/mcp_config.json`.
+- **Zed**: in `settings.json`, `"context_servers": { "lognorth": { "source": "custom", "command": { "path": "north", "args": ["mcp"] } } }`.
+
+An app started from the Dock may not see your shell's `PATH`. If it cannot find `north`, use the full path from `command -v north`.
+
+### Without north
+
+The server speaks MCP over HTTPS at `https://logs.yoursite.com/mcp`, with the agent key as a Bearer token. Any client that takes a URL and headers can connect directly:
 
 ```bash
 claude mcp add --transport http lognorth https://logs.yoursite.com/mcp \
   --header "Authorization: Bearer lgn-agent-..."
 ```
 
-### Codex
-
-```
-codex plugin marketplace add karloscodes/lognorth-releases
-codex plugin add lognorth@karloscodes
-```
-
-That installs the skills. For the native tools too, add the server once. Codex reads the key from your environment each session:
-
-```bash
-codex mcp add lognorth --url https://logs.yoursite.com/mcp --bearer-token-env-var LOGNORTH_AGENT_KEY
-```
-
-### GitHub Copilot CLI
-
-```
-copilot plugin marketplace add karloscodes/lognorth-releases
-copilot plugin install lognorth@karloscodes
-```
-
-### VS Code, with Copilot
-
-Add the marketplace to your settings, then install **lognorth** from the Extensions view (search `@agentPlugins`):
-
-```json
-"chat.plugins.marketplaces": ["karloscodes/lognorth-releases"]
-```
-
-For the native tools, add the server:
-
-```bash
-code --add-mcp '{"name":"lognorth","type":"http","url":"https://logs.yoursite.com/mcp","headers":{"Authorization":"Bearer lgn-agent-..."}}'
-```
-
-### Gemini CLI
-
-```
-gemini extensions install https://github.com/karloscodes/lognorth-releases --ref main
-```
-
-`--ref main` matters: this repo's GitHub releases hold the server binaries, and without it Gemini installs the latest release instead of the extension. It asks for your URL and agent key, and keeps the key in your system keychain. Then `/lognorth:investigate` works as in Claude Code.
-
-### Cursor
-
-`~/.cursor/mcp.json` for every project, or `.cursor/mcp.json` for one:
-
-```json
-{
-  "mcpServers": {
-    "lognorth": {
-      "url": "https://logs.yoursite.com/mcp",
-      "headers": { "Authorization": "Bearer lgn-agent-..." }
-    }
-  }
-}
-```
-
-### Windsurf
-
-`~/.codeium/windsurf/mcp_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "lognorth": {
-      "serverUrl": "https://logs.yoursite.com/mcp",
-      "headers": { "Authorization": "Bearer lgn-agent-..." }
-    }
-  }
-}
-```
-
-### Zed, and other stdio-only clients
-
-Bridge them with `mcp-remote`, which turns a stdio client into an HTTP one. Zed, in `settings.json`:
-
-```json
-{
-  "context_servers": {
-    "lognorth": {
-      "source": "custom",
-      "command": {
-        "path": "npx",
-        "args": ["-y", "mcp-remote", "https://logs.yoursite.com/mcp", "--header", "Authorization: Bearer lgn-agent-..."]
-      }
-    }
-  }
-}
-```
-
-### Any agent: the skills and two variables
-
-The skills work even where the MCP tools are not connected. They call the same endpoint over HTTPS with `curl`, using two variables from your shell profile:
-
-```bash
-export LOGNORTH_URL=https://logs.yoursite.com
-export LOGNORTH_AGENT_KEY=lgn-agent-...
-```
+That puts the key in the client's config file. Keep that file out of git.
 
 For an agent without plugins, copy `skills/lognorth` and `skills/lognorth-integrate` into its skills folder.
 
@@ -194,23 +134,24 @@ Or just ask: "is anything broken in production?"
 
 ## If it does not connect
 
-- **404 on `/mcp`** — the server predates v0.16.0. Run `lognorth update`.
-- **401** — wrong key, or an app key instead of an agent key. Agent keys start with `lgn-agent-` and come from Settings > Developer.
-- **Nothing in the tool list** — most clients only read MCP config at startup. Restart it.
-- **Claude Code shows the server but no tools** — the URL or key never resolved. Run `/lognorth:connect`, which verifies both before saving.
-- **Client not listed above** — every client takes either a URL with headers or a stdio command. Use the JSON shape from Cursor for the first, and the `mcp-remote` command for the second. Paths for these config files move between releases, so check your client's docs if the one above is missing.
+Run `north` in a terminal. It says which server it reads, or that it is not connected yet.
+
+- **"the server rejected the agent key"**: a wrong key, or an app key. Run `north connect` with the agent key from Settings > Developer.
+- **404 on `/mcp`**: the server predates v0.16.0. Run `lognorth update` on it.
+- **Nothing in the tool list**: most clients read MCP config at startup. Restart the agent.
+- **"north: command not found" in the agent's MCP log**: the agent cannot see `north` on its `PATH`. Add the folder the installer named to your `PATH`, or put the full path in the config.
 
 ## From your terminal
 
-The same tools work without an agent. `north`, an open-source CLI, reads your server from any machine (LogNorth v0.20.0 or later):
+`north` also reads your server without an agent:
 
 ```bash
-curl -fsSL https://lognorth.com/cli | sh   # installs north, then asks for your URL and key
 north tail --errors     # the log, live
 north top               # endpoints, alerts, and uptime, like htop
+north call list_alerts  # any tool, as JSON
 ```
 
-It uses the same agent key and the same `LOGNORTH_URL` and `LOGNORTH_AGENT_KEY` variables. Source: [karloscodes/lognorth-cli](https://github.com/karloscodes/lognorth-cli). See [Terminal](https://lognorth.com/docs/features/terminal/).
+Source: [karloscodes/lognorth-cli](https://github.com/karloscodes/lognorth-cli). See [Terminal](https://lognorth.com/docs/features/terminal/).
 
 ## Docs
 
