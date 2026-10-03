@@ -94,25 +94,28 @@ OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer lgn-..."
 
 No SDK and no OpenTelemetry: write a small client in the project's language. The protocol is at https://lognorth.com/docs/integrations/protocol/. Read it if you can; the rules below are the part that must not be skipped.
 
-**Send.** `POST {LOGNORTH_URL}/api/v1/events/batch` with `Authorization: Bearer {LOGNORTH_API_KEY}`, `Content-Type: application/json`, and `{"events": [...]}`. At most 1,000 events and 4 MB per request. Each event: `message` (required), `timestamp` (RFC 3339 UTC, set when it happens), `duration_ms`, `trace_id`, `context`.
+**Send.** `POST {LOGNORTH_URL}/api/v1/events/batch` with `Authorization: Bearer {LOGNORTH_API_KEY}`, `Content-Type: application/json`, and `{"events": [...]}`. Batches of at most 500 events and 1 MB of JSON. Each event: `message` (required), `timestamp` (RFC 3339 UTC, set when it happens), `duration_ms`, `trace_id`, `context`.
 
-**Capture.** A middleware sends one event per request after the response: message `"METHOD /path → status"`, and `method`, `path` (no query string), `status` (a number), and `environment` in `context`. Unhandled errors add `error`, `error_class`, `error_file`, `error_line`, and `stack_trace` (about 20 frames). Jobs send one event when they end. Send nothing in `development` and `test`.
+**Capture.** A middleware sends one event per request after the response: message `"METHOD /path → status"`, and `method`, `path` (no query string), `status` (a number), and `environment` in `context`. Unhandled errors add `error`, `error_class`, `error_file`, `error_line`, and `stack_trace`. Jobs send one event when they end. Send nothing in `development` and `test`.
 
-**Buffer.** Never send on the request path and never raise into the app. Keep events in memory; flush at 10 events or 5 seconds after the first; send error events at once; cap the buffer at 1,000 and drop the oldest; send one request at a time; flush on SIGTERM, SIGINT, and exit with a deadline of a few seconds.
+**Buffer.** Never send on the request path and never raise into the app.
+- Trim each event to 64 KB before it is buffered: `message` 1,000 characters, `stack_trace` 16 KB (keep the top), other context strings 8 KB; set `context.truncated = true`.
+- Limit the buffer to 10,000 events or 10 MB of JSON, whichever comes first. At a limit, drop the oldest event that is not an error; drop an error only when nothing else is left. Count drops.
+- Send at 10 events, at once for an error, at once past half of either limit, or 5 seconds after the first event. One request at a time. Flush on SIGTERM, SIGINT, and exit within a few seconds.
 
-**Retry.**
+**Retry. Keep the events; drop only what can never be accepted.**
 
 | Answer | Do |
 |---|---|
-| `201` | Done. Do not resend events listed in `"errors"`. |
-| `400`, `401`, `404` | Do not retry. Drop the batch and write one line to stderr. |
-| `413` | Split the batch in half and resend each half. |
-| `429` | Keep the events, wait `Retry-After` seconds. |
-| `5xx`, network error, timeout | Keep the events at the front of the buffer, back off 1s, 2s, 4s up to 60s with 20% jitter. |
+| `2xx` | Done. Reset the backoff. If anything was dropped, send one event `LogNorth client dropped N events` with `context.dropped` and `context.dropped_errors`. |
+| `503`, `429` | Put the batch back at the front. Wait the seconds in `Retry-After` (LogNorth always sends it), then send again. |
+| Other `5xx`, `408`, network error, timeout | Put the batch back at the front. Back off 1s, 2s, 4s up to 60s, with 20% jitter. |
+| `401`, `403`, `404` | Put the batch back at the front. One stderr line. Retry every minute, then up to every 5 minutes. |
+| `413`, `400`, other `4xx` | Split the batch in half and resend each half. Drop and count only a single event that is still refused. |
 
-Use a 5-second connect timeout and a 10-second request timeout.
+Use a 5-second connect timeout and a 10-second request timeout. Keep accepting events while waiting.
 
-Put the client in one small module the project owns, with no new dependency when the standard library can do HTTP and JSON. Test the parts that decide: what gets buffered, what is retried, and what is dropped, against a local HTTP server that answers 201, 429, 500, and 401.
+Put the client in one small module the project owns, with no new dependency when the standard library can do HTTP and JSON. Test the parts that decide, against a local HTTP server: a 503 and a 429 with `Retry-After` are retried after the wait, a 500 and a dropped connection are retried with backoff, a 401 keeps the events, a 413 splits the batch, the buffer limits drop non-errors first, and the order survives retries.
 
 ## 4. Log what the middleware cannot see
 
