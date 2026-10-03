@@ -2,7 +2,7 @@
   "name": "lognorth",
   "displayName": "LogNorth",
   "description": "Read your production logs from inside Cursor: alerts, failing endpoints, grouped errors, uptime, and full request traces from your self-hosted LogNorth. Read-only.",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "author": {
     "name": "Carlos Castellanos"
   },
