@@ -96,6 +96,8 @@ No SDK and no OpenTelemetry: write a small client in the project's language. The
 
 **Send.** `POST {LOGNORTH_URL}/api/v1/events/batch` with `Authorization: Bearer {LOGNORTH_API_KEY}`, `Content-Type: application/json`, and `{"events": [...]}`. Batches of at most 500 events and 1 MB of JSON. Each event: `message` (required), `timestamp` (RFC 3339 UTC, set when it happens), `duration_ms`, `trace_id`, `context`.
 
+**Time and order.** Stamp `timestamp` the moment the event happens (UTC, milliseconds) and keep it on every retry. Keep the logged order: first in, first out, a failed batch back at the front, one request at a time. LogNorth shows events by when they happened, so a late batch lands at its own time.
+
 **Capture.** A middleware sends one event per request after the response: message `"METHOD /path → status"`, and `method`, `path` (no query string), `status` (a number), and `environment` in `context`. Unhandled errors add `error`, `error_class`, `error_file`, `error_line`, and `stack_trace`. Jobs send one event when they end. Send nothing in `development` and `test`.
 
 **Buffer.** Never send on the request path and never raise into the app.
