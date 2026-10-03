@@ -68,7 +68,7 @@ Next.js route handlers: `export const GET = withLogger()(handler)` from `lognort
 
 ```ruby
 # Gemfile
-gem "lognorth", github: "karloscodes/lognorth-sdk-rails"
+gem "lognorth"
 ```
 
 Put the URL and key in credentials (`bin/rails credentials:edit`):
