@@ -110,14 +110,14 @@ No SDK and no OpenTelemetry: write a small client in the project's language. The
 | Answer | Do |
 |---|---|
 | `2xx` | Done. Reset the backoff. If anything was dropped, send one event `LogNorth client dropped N events` with `context.dropped` and `context.dropped_errors`. |
-| `503`, `429` | Put the batch back at the front. Wait the seconds in `Retry-After` (LogNorth always sends it), then send again. |
+| `503`, `429` | Put the batch back at the front. Wait the seconds in `Retry-After` (LogNorth always sends it), then send again. Leave the backoff as it is: it is for answers that do not say when. |
 | Other `5xx`, `408`, network error, timeout | Put the batch back at the front. Back off 1s, 2s, 4s up to 60s, with 20% jitter. |
 | `401`, `403`, `404` | Put the batch back at the front. One stderr line. Retry every minute, then up to every 5 minutes. |
 | `413`, `400`, other `4xx` | Split the batch in half and resend each half. Drop and count only a single event that is still refused. |
 
-Use a 5-second connect timeout and a 10-second request timeout. Keep accepting events while waiting.
+Use a 5-second connect timeout and a 10-second request timeout. Keep accepting events while waiting. A retry takes a full batch from the front again, not only the events of the failed one.
 
-Put the client in one small module the project owns, with no new dependency when the standard library can do HTTP and JSON. Test the parts that decide, against a local HTTP server: a 503 and a 429 with `Retry-After` are retried after the wait, a 500 and a dropped connection are retried with backoff, a 401 keeps the events, a 413 splits the batch, the buffer limits drop non-errors first, and the order survives retries.
+Put the client in one small module the project owns, with no new dependency when the standard library can do HTTP and JSON. Test the parts that decide, against a local HTTP server: a 503 and a 429 with `Retry-After` are retried after the wait and do not grow the backoff, a 500 and a dropped connection are retried with backoff, a 401 keeps the events, a 413 splits the batch, the buffer limits drop non-errors first, and the order survives retries.
 
 ## 4. Log what the middleware cannot see
 
