@@ -51,18 +51,18 @@ If the project logs with slog: `slog.SetDefault(slog.New(lognorth.NewHandler()))
 ### Node.js / Bun
 
 ```bash
-npm install github:karloscodes/lognorth-sdk-ts
+npm install lognorth
 ```
 
 ```typescript
-import LogNorth from '@karloscodes/lognorth-sdk'
-import { middleware } from '@karloscodes/lognorth-sdk/express' // or /hono
+import LogNorth from 'lognorth'
+import { middleware } from 'lognorth/express' // or /hono
 
 LogNorth.config(process.env.LOGNORTH_URL!, process.env.LOGNORTH_API_KEY!) // environment defaults to NODE_ENV
 app.use(middleware({ ignorePaths: ['/healthz', '/metrics'] }))
 ```
 
-Next.js route handlers: `export const GET = withLogger()(handler)` from `@karloscodes/lognorth-sdk/next`. Pino: see the SDK README.
+Next.js route handlers: `export const GET = withLogger()(handler)` from `lognorth/next`. Pino: see the SDK README.
 
 ### Rails
 
