@@ -8,7 +8,7 @@ Everything stays on your box. Your agent asks your instance, and only the answer
 
 It installs as a plugin in Claude Code, Codex, GitHub Copilot CLI, VS Code, and Gemini CLI, from one terminal command.
 
-Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/lognorth:investigate` need the release after v0.16.2. `list_endpoints` and `uptime_timeline` need v0.20.0. Run `lognorth update` if you are behind.
+Needs LogNorth **v0.16.0 or later**. `list_alerts`, `endpoint_timeline`, and `/lognorth:investigate` need the release after v0.16.2. `list_endpoints` and `uptime_timeline` need v0.20.0. To update, run the install line on the server again: `curl -fsSL lognorth.com/install | bash` (`lognorth update` on a server of the older installer).
 
 ## What you get
 
@@ -126,7 +126,7 @@ Or just ask: "is anything broken in production?"
 Run `north` in a terminal. It says which server it reads, or that it is not connected yet.
 
 - **"the server rejected the agent key"**: a wrong key, or an app key. Run `north connect` with the agent key from Settings > Developer.
-- **404 on `/mcp`**: the server predates v0.16.0. Run `lognorth update` on it.
+- **404 on `/mcp`**: the server predates v0.16.0. Update it: run the install line on it again, or `lognorth update` on a server of the older installer.
 - **Nothing in the tool list**: most clients read MCP config at startup. Restart the agent.
 - **"north: command not found" in the agent's MCP log**: the agent cannot see `north` on its `PATH`. Add the folder the installer named to your `PATH`, or put the full path in the config.
 

@@ -44,7 +44,7 @@ north call search_logs '{"errors_only": true, "since": "2h"}'
 
 ## When a tool is missing
 
-`list_alerts`, `endpoint_timeline`, and the `issue` and `until` arguments of `search_logs` need a newer LogNorth, and `list_endpoints` and `uptime_timeline` need v0.20.0. If they are not in the tool list, tell the user to run `lognorth update` on the server, then continue with the tools you have. If no `lognorth` tools appear at all, use `north call` as above, and tell the user that `north agents` in a terminal adds the tools.
+`list_alerts`, `endpoint_timeline`, and the `issue` and `until` arguments of `search_logs` need a newer LogNorth, and `list_endpoints` and `uptime_timeline` need v0.20.0. If they are not in the tool list, tell the user to update LogNorth (run the install line `curl -fsSL lognorth.com/install | bash` on the server again, or `lognorth update` on a server of the older installer), then continue with the tools you have. If no `lognorth` tools appear at all, use `north call` as above, and tell the user that `north agents` in a terminal adds the tools.
 
 ## More detail
 
