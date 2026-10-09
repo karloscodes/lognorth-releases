@@ -100,6 +100,8 @@ No SDK and no OpenTelemetry: write a small client in the project's language. The
 
 **Capture.** A middleware sends one event per request after the response: message `"METHOD /path → status"`, and `method`, `path` (no query string), `status` (a number), and `environment` in `context`. Unhandled errors add `error`, `error_class`, `error_file`, `error_line`, and `stack_trace`. Jobs send one event when they end. Send nothing in `development` and `test`.
 
+**User and release.** Add `user` (an ID, never an email) to a request's events when someone is signed in, and `user_agent` to failed requests. Read the release once at startup (an option, or `LOGNORTH_RELEASE`, `GIT_SHA`, `KAMAL_VERSION`, or the host's commit variable), put it as `release` on error events, and log one event `Release <version> started` with `context.release` at startup.
+
 **Buffer.** Never send on the request path and never raise into the app.
 - Trim each event to 64 KB before it is buffered: `message` 1,000 characters, `stack_trace` 16 KB (keep the top), other context strings 8 KB; set `context.truncated = true`.
 - Limit the buffer to 10,000 events or 10 MB of JSON, whichever comes first. At a limit, drop the oldest event that is not an error; drop an error only when nothing else is left. Count drops.
@@ -118,6 +120,24 @@ No SDK and no OpenTelemetry: write a small client in the project's language. The
 Use a 5-second connect timeout and a 10-second request timeout. Keep accepting events while waiting. A retry takes a full batch from the front again, not only the events of the failed one.
 
 Put the client in one small module the project owns, with no new dependency when the standard library can do HTTP and JSON. Test the parts that decide, against a local HTTP server: a 503 and a 429 with `Retry-After` are retried after the wait and do not grow the backoff, a 500 and a dropped connection are retried with backoff, a 401 keeps the events, a 413 splits the batch, the buffer limits drop non-errors first, and the order survives retries.
+
+### Name the user
+
+The issue page counts the users an issue hit, and shows what a user did before an error. Name the signed-in user where the app knows it, after authentication. Use an ID, never an email:
+
+```go
+lognorth.SetUser(r.Context(), strconv.Itoa(user.ID)) // inside lognorth.Middleware
+```
+
+```typescript
+LogNorth.setUser(user.id) // inside a request the middleware wraps
+```
+
+```ruby
+before_action { LogNorth.user = current_user&.id } # only when the app has no Current.user
+```
+
+The release needs no code when the deploy sets `KAMAL_VERSION`, `GIT_SHA`, or a host's commit variable. Otherwise pass it: `Release` in Go's `Options`, `release` in `LogNorth.config`, `release:` in Rails. Each release then shows on LogNorth's charts as a dashed line. These need SDK 0.2.0 or later.
 
 ## 4. Log what the middleware cannot see
 
