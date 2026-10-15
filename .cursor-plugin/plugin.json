@@ -1,8 +1,8 @@
 {
   "name": "lognorth",
   "displayName": "LogNorth",
-  "description": "Pull alerts, errors, and request traces from your self-hosted LogNorth. Read-only.",
-  "version": "0.24.0",
+  "description": "Read your production logs from inside your coding agent: alerts, issues, failing requests, and traces from your self-hosted LogNorth. Read-only.",
+  "version": "0.24.1",
   "author": {
     "name": "Carlos Castellanos"
   },
