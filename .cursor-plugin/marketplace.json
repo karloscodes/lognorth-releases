@@ -11,7 +11,7 @@
     {
       "name": "lognorth",
       "source": "./",
-      "description": "Read your production logs from inside Cursor: alerts, failing endpoints, grouped errors, uptime, and full request traces from your self-hosted LogNorth. Read-only.",
+      "description": "Pull alerts, errors, and request traces from your self-hosted LogNorth. Read-only.",
       "category": "observability"
     }
   ]
