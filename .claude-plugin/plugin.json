@@ -1,6 +1,6 @@
 {
   "name": "lognorth",
-  "description": "Read your production logs from inside your coding agent. Bundles the LogNorth MCP server with the investigation and SDK integration skills.",
+  "description": "Pull alerts, errors, and request traces from your self-hosted LogNorth. Read-only.",
   "version": "0.24.0",
   "author": {
     "name": "Carlos Castellanos",
